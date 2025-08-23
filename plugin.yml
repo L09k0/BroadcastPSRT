@@ -1,0 +1,9 @@
+name: BroadcastPSRT
+version: 2.0
+author: "L09k0"
+main: logko.BroadcastPSRT.SugMain
+api-version: "1.18"
+
+commands:
+   pasha:
+    usage: "Command \"/pasha\" not must arguments!"
