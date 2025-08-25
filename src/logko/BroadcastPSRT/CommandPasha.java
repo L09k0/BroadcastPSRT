@@ -1,10 +1,9 @@
 package logko.BroadcastPSRT;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
+import java.security.SecureRandom;
 import java.util.List;
-import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -20,67 +19,62 @@ public class CommandPasha implements CommandExecutor
     {
         this.plugin = plugin;
     }
+ 
+    SecureRandom rnd = new SecureRandom();
+    
+    private String getTextLine() throws Exception
+    {
+        File File = new File(plugin.getDataFolder(), "textline.psrt");     
+        if (!File.exists())
+           	throw new Exception("File textline.psrt not found!");
+        
+        List<String> line = Files.readAllLines(File.toPath());
+        if (line.isEmpty()) 
+           	throw new Exception("File textline.psrt empty!");
+        
+		return line.get(rnd.nextInt(line.size())).toString();
+    }
+    
+    private String getBotNickname() throws Exception
+    {
+    	File File = new File(plugin.getDataFolder(), "BotNickname.psrt");     
+        if (!File.exists())
+        	throw new Exception("File BotNickname.psrt not found!");
+        
+        List<String> line = Files.readAllLines(File.toPath());
+        if (line.isEmpty()) 
+        	throw new Exception("File BotNickname.psrt empty!");
+        
+		return line.get(rnd.nextInt(line.size())).toString();
+    }
 	
-	private boolean SayPasha() 
+	private String SayPasha() throws Exception 
 	{	
-		try 
-		{
-			Random rnd = new Random();
-			
-	        File TextFile = new File(plugin.getDataFolder(), "textline.psrt");     
-	        if (!TextFile.exists())
-	        {
-	            Bukkit.getLogger().warning("File textline.psrt not found!");
-	            return false;
-	        }
-	        
-            List<String> lines = Files.readAllLines(TextFile.toPath());
-            if (lines.isEmpty()) 
-            {
-                plugin.getLogger().warning("File textline.psrt empty!");
-                return false;
-            }
-            
-	        File NameFile = new File(plugin.getDataFolder(), "BotNickname.psrt");     
-	        if (!NameFile.exists())
-	        {
-	            Bukkit.getLogger().warning("File BotNickname.psrt not found!");
-	            return false;
-	        }
-	        
-            List<String> linesname = Files.readAllLines(NameFile.toPath());
-            if (lines.isEmpty()) 
-            {
-                plugin.getLogger().warning("File BotNickname.psrt empty!");
-                return false;
-            }
-	        
-            int randline = rnd.nextInt(lines.size()); 
-            int randNameIndex = rnd.nextInt(linesname.size());
-            String str = lines.get(randline);
-            String Name = linesname.get(randNameIndex);
-            String endstr = "<BOT " + Name + "> " + str;
-            
-	        Bukkit.broadcastMessage(endstr);
-	      	return true;
-	    } 
-		catch (IOException e) 
-		{
-			e.printStackTrace();
-	      	return false;
-		}
+        String str = getTextLine();
+        String Name = getBotNickname();
+        String endstr = "<BOT " + Name + "> " + str;
+ 
+      	return endstr.toString();
 	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) 
 	{
-		if(args.length > 0)
+		if(args.length != 0)
 			return false;
 		
-		if(!SayPasha())
-			return false;
-		else
+		try 
+		{
+			Bukkit.broadcastMessage(SayPasha().toString());
 			return true;
+		} 
+		catch (Exception error) 
+		{
+			error.printStackTrace();
+			plugin.getLogger().warning(error.toString());
+			sender.sendMessage("[BroadcastPSRT]: " + error.toString());
+	      	return true;
+		}
 	}
 
 }
